@@ -1,0 +1,20 @@
+description: 获取 DeepSeek 回复
+author: Drelf2018
+namespace: deepseek
+version: v0.0.1
+env:
+  model: reasoner
+  system: null
+  history: null
+steps:
+  - method: POST
+    url: https://serverless.nana7mi.link/api/assistant/deepseek_{{ model }}
+    body: |-
+      {
+        "key": "{{ key }}",
+        "input": "{{ input }}",
+        "system": "{{ if system }}{{ system }}{{ end }}",
+        "history": {{ if history }}{{ history }}{{ else }}null{{ end }}
+      }
+    out:
+      msg: '{{ if (eq (gjson $response "code") 0.0) }}{{ gjson $response "msg" }}{{ end }}'

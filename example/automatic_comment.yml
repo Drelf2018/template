@@ -1,0 +1,48 @@
+description: 利用 DeepSeek 评论最新微博
+author: Drelf2018
+version: v0.0.1
+steps:
+  - uses: get_index.yml
+    set:
+      blog: '{{ gjson weibo_blogs "#(title.base_color=~false)|@tostr" }}'
+      set: 
+        mid: '{{ gjson blog "mid" }}'
+        name: '{{ gjson blog "user.screen_name" }}'
+        time: '{{ gjson blog "created_at" }}'
+        source: '{{ gjson blog "region_name" }}'
+        plaintext: '{{ plaintext (gjson blog "text") }}'
+        set:
+          input: '博主{{ name }}在{{ time }}{{ source }}说：“{{ plaintext }}”'
+    out:
+      input: '{{ input }}'
+  
+  - uses: deepseek_response.yml
+    env:
+      model: chat
+      system: 接下来我会提供一条微博，请你帮我写一条评论，直接返回要评论的内容，不要用引号包裹内容，不要给出解释
+    set:
+      comment: '{{ deepseek_msg }}'
+    out:
+      comment: '{{ comment }}'
+  
+  - description: 发布微博评论
+    author: Drelf2018
+    version: v0.0.1
+    method: POST
+    url: https://weibo.com/ajax/comments/create
+    body: 'id={{ mid }}&comment={{ comment }}'
+    header:
+      User-Agent: 
+        - "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36"
+      Referer:
+        - "https://weibo.com/"
+      X-Requested-With:
+        - "XMLHttpRequest"
+      Content-Type:
+        - "application/x-www-form-urlencoded"
+      Cookie:
+        - "{{ cookie }}"
+    out:
+      status: '{{ gjson $response "msg" }}'
+      
+      
