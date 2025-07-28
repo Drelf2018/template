@@ -8,8 +8,7 @@ import (
 	"strconv"
 	"strings"
 	"text/template"
-
-	_ "unsafe"
+	"unicode"
 )
 
 // 环境
@@ -19,8 +18,22 @@ func (e Env) Get(key string) func() any {
 	return func() any { return e[key] }
 }
 
-//go:linkname GoodName text/template.goodName
-func GoodName(name string) bool
+// copy from text/template.goodName
+func GoodName(name string) bool {
+	if name == "" {
+		return false
+	}
+	for i, r := range name {
+		switch {
+		case r == '_':
+		case i == 0 && !unicode.IsLetter(r):
+			return false
+		case !unicode.IsLetter(r) && !unicode.IsDigit(r):
+			return false
+		}
+	}
+	return true
+}
 
 // 保存环境变量
 func (e Env) Set(tmpl *template.Template, prefix string) error {
