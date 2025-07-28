@@ -8,11 +8,8 @@ steps:
   - method: GET
     url: https://m.weibo.cn/api/container/getIndex?containerid=107603{{ uid }}&page={{ page }}
     header:
-      User-Agent: 
-        - "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36"
-      Referer:
-        - "https://weibo.com/"
-      X-Requested-With:
-        - "XMLHttpRequest"
+      User-Agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36"
+      Referer: "https://weibo.com/"
+      X-Requested-With: "XMLHttpRequest"
     out:
       blogs: '{{ json (gjson $response "data.cards.#.mblog") }}'

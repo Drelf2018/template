@@ -235,15 +235,15 @@ func (t *Template) Do(tmpl *template.Template, data any) (out Env, result []byte
 // 步骤
 type Step struct {
 	Template   `yaml:",inline"`
-	TemplateID uint64      `json:"-"       yaml:"-"`                             // 模板外键
-	Skip       string      `json:"skip"    yaml:"skip"`                          // 跳过步骤
-	Uses       string      `json:"uses"    yaml:"uses"`                          // 使用模板
-	Method     string      `json:"method"  yaml:"method"`                        // 请求方法
-	URL        string      `json:"url"     yaml:"url"`                           // 请求地址
-	Body       string      `json:"body"    yaml:"body"`                          // 请求内容
-	Header     http.Header `json:"header"  yaml:"header" gorm:"serializer:json"` // 请求头部
-	Set        Env         `json:"set"     yaml:"set"    gorm:"serializer:json"` // 设置环境变量
-	Out        Env         `json:"out"     yaml:"out"    gorm:"serializer:json"` // 导出环境变量
+	TemplateID uint64 `json:"-"       yaml:"-"`                             // 模板外键
+	Skip       string `json:"skip"    yaml:"skip"`                          // 跳过步骤
+	Uses       string `json:"uses"    yaml:"uses"`                          // 使用模板
+	Method     string `json:"method"  yaml:"method"`                        // 请求方法
+	URL        string `json:"url"     yaml:"url"`                           // 请求地址
+	Body       string `json:"body"    yaml:"body"`                          // 请求内容
+	Header     Env    `json:"header"  yaml:"header" gorm:"serializer:json"` // 请求头部
+	Set        Env    `json:"set"     yaml:"set"    gorm:"serializer:json"` // 设置环境变量
+	Out        Env    `json:"out"     yaml:"out"    gorm:"serializer:json"` // 导出环境变量
 }
 
 var ErrEmptyURL = errors.New("template: step URL is empty")
@@ -256,27 +256,27 @@ func (s *Step) Request(tmpl *template.Template, data any) (*http.Request, error)
 	}
 	url, err := ToString(tmpl, s.URL, data)
 	if err != nil {
-		return nil, fmt.Errorf("template: execute step.URL \"%s\" failed: %w", s.URL, err)
+		return nil, fmt.Errorf("template: failed to execute step.URL \"%s\": %w", s.URL, err)
 	}
 	// 解析请求体
 	var body io.Reader
 	if s.Body != "" {
 		body, err = ToBuffer(tmpl, s.Body, data)
 		if err != nil {
-			return nil, fmt.Errorf("template: execute step.Body \"%s\" failed: %w", s.Body, err)
+			return nil, fmt.Errorf("template: failed to execute step.Body \"%s\": %w", s.Body, err)
 		}
 	}
 	// 创建请求
 	req, err := http.NewRequest(s.Method, url, body)
 	if err != nil {
-		return nil, fmt.Errorf("template: create step \"%s\" request failed: %w", s.Template, err)
+		return nil, fmt.Errorf("template: failed to create request \"%s\": %w", s.Template, err)
 	}
 	// 解析请求头
-	for k, vs := range s.Header {
-		for _, v := range vs {
+	for k, v := range s.Header {
+		if v, ok := v.(string); ok {
 			v, err = ToString(tmpl, v, data)
 			if err != nil {
-				return nil, fmt.Errorf("template: execute step.Header \"%s\" failed: %w", k, err)
+				return nil, fmt.Errorf("template: failed to execute step.Header \"%s\": %w", k, err)
 			}
 			req.Header.Add(k, v)
 		}

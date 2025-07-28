@@ -32,16 +32,11 @@ steps:
     url: https://weibo.com/ajax/comments/create
     body: 'id={{ mid }}&comment={{ comment }}'
     header:
-      User-Agent: 
-        - "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36"
-      Referer:
-        - "https://weibo.com/"
-      X-Requested-With:
-        - "XMLHttpRequest"
-      Content-Type:
-        - "application/x-www-form-urlencoded"
-      Cookie:
-        - "{{ cookie }}"
+      User-Agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36"
+      Referer: "https://weibo.com/"
+      X-Requested-With: "XMLHttpRequest"
+      Content-Type: "application/x-www-form-urlencoded"
+      Cookie: "{{ cookie }}"
     out:
       status: '{{ gjson $response "msg" }}'
       
